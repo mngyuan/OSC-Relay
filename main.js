@@ -1,7 +1,7 @@
-const {app, BrowserWindow} = require('electron/main');
+const {app, BrowserWindow, ipcMain} = require('electron/main');
 const path = require('node:path');
 
-// OSC
+// -------------------------- OSC --------------------------
 const osc = require('osc');
 const express = require('express');
 const WebSocket = require('ws');
@@ -12,11 +12,12 @@ const udpPort = new osc.UDPPort({
   localPort: 9999,
 });
 
-udpPort.on('ready', function () {
+const portReadyCb = () => {
   console.log('Listening for OSC over UDP.');
   console.log(' Host: localhost Port:', udpPort.options.localPort);
-});
+};
 
+udpPort.on('ready', portReadyCb);
 udpPort.open();
 
 // Create an Express-based Web Socket server to which OSC messages will be relayed.
@@ -27,6 +28,9 @@ const wss = new WebSocket.Server({
 });
 
 wss.on('connection', function (socket) {
+  // unfortunately, osc's Port.on only has events for when messages are received
+  // not when they are _sent_, so we have to log them on the UDP side
+  // ideally we would log them on socketPort or relay
   console.log('A Web Socket connection has been established!');
   var socketPort = new osc.WebSocketPort({
     socket: socket,
@@ -36,7 +40,7 @@ wss.on('connection', function (socket) {
     raw: true,
   });
 });
-// END OSC
+// -------------------------- END OSC --------------------------
 
 const createWindow = () => {
   const win = new BrowserWindow({
@@ -48,9 +52,25 @@ const createWindow = () => {
   });
 
   win.loadFile('index.html');
+
+  // Set up OSC message forwarding to the frontend
+  udpPort.on('message', function (msg) {
+    console.log('udp', msg);
+    win.webContents.send('udp-osc-msg', msg);
+  });
 };
 
 app.whenReady().then(() => {
+  ipcMain.on('set-udp-port', (event, arg) => {
+    console.log('Changing UDP in port to', arg);
+    udpPort.options.localPort = arg;
+    udpPort.open();
+  });
+  ipcMain.on('set-socket-port', (event, arg) => {
+    console.log('Changing websocket out port to', arg);
+    server.close();
+    server.listen(arg);
+  });
   createWindow();
 
   app.on('activate', () => {
