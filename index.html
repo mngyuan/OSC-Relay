@@ -13,7 +13,7 @@
     <style>
       body {
         margin: 0;
-        padding-bottom: 3rem;
+        padding: 1rem;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
           Helvetica, Arial, sans-serif;
       }
@@ -35,39 +35,111 @@
       }
       #messages > li {
         padding: 0.5rem 1rem;
+        display: flex;
+        align-items: center;
       }
       #messages > li:nth-child(odd) {
         background: #efefef;
       }
 
+      .row {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+
       input {
         width: 60px;
       }
+
+      p {
+        margin: 0;
+      }
+
+      .socket {
+        background-color: yellow;
+      }
+
+      .badge {
+        text-transform: uppercase;
+        font-size: 8px;
+        padding: 8px;
+        border-radius: 8px;
+        margin-right: 8px;
+      }
+
+      .udp {
+        background-color: orange;
+      }
     </style>
 
-    <p id="info"></p>
-    <label for="inport">Incoming OSC UDP Port</label>
-    <input
-      type="number"
-      id="inport"
-      name="inport"
-      required
-      size="10"
-      value="9999"
-    />
-    <button id="inportset">Set</button>
+    <div class="row">
+      <label for="udpinport">Receiving OSC UDP Port</label>
+      <div>
+        <input
+          type="number"
+          id="udpinport"
+          name="udpinport"
+          required
+          size="10"
+          value="9999"
+        />
+        <button id="udpinportset">Set</button>
+      </div>
+    </div>
+
+    <div class="row">↓</div>
+
+    <div class="row">
+      <label for="socketport">OSC Websocket Port</label>
+      <div>
+        <input
+          type="number"
+          id="socketport"
+          name="socketport"
+          required
+          size="10"
+          value="8081"
+        />
+        <button id="socketportset">Set</button>
+      </div>
+    </div>
+
     <br />
 
-    <label for="outport">Outgoing OSC Websocket Port</label>
-    <input
-      type="number"
-      id="outport"
-      name="outport"
-      required
-      size="10"
-      value="8081"
-    />
-    <button id="outportset">Set</button>
+    <div class="row">
+      <label for="socketoutport">OSC Websocket Port</label>
+      <div>
+        <input
+          type="number"
+          id="socketoutport"
+          name="socketoutport"
+          required
+          size="10"
+          value="8081"
+          disabled
+        />
+        <button id="socketoutportset" disabled>Set</button>
+      </div>
+    </div>
+
+    <div class="row">↓</div>
+
+    <div class="row">
+      <label for="udpoutport">Sending OSC UDP Port</label>
+      <div>
+        <input
+          type="number"
+          id="udpoutport"
+          name="udpoutport"
+          required
+          size="10"
+          value="9998"
+        />
+        <button id="udpoutportset">Set</button>
+      </div>
+    </div>
 
     <ul id="messages"></ul>
   </body>

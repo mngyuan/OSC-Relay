@@ -1,18 +1,27 @@
-const information = document.getElementById('info');
-information.innerText = `This app is using Chrome (v${electronAPI.chrome()}), Node.js (v${electronAPI.node()}), and Electron (v${electronAPI.electron()})`;
-
-const inPortInput = document.getElementById('inport');
-const outPortInput = document.getElementById('outport');
-document.getElementById('inportset').addEventListener('click', () => {
-  electronAPI.setUDPPort(inPortInput.value);
+const udpinPortInput = document.getElementById('udpinport');
+const socketportInput = document.getElementById('socketport');
+const socketoutportInput = document.getElementById('socketoutport');
+const udpoutPortInput = document.getElementById('udpoutport');
+document.getElementById('udpinportset').addEventListener('click', () => {
+  electronAPI.setUDPPort(udpinPortInput.value);
 });
-document.getElementById('outportset').addEventListener('click', () => {
-  electronAPI.setSocketPort(outPortInput.value);
+document.getElementById('socketportset').addEventListener('click', () => {
+  electronAPI.setSocketPort(socketportInput.value);
+});
+document.getElementById('udpoutportset').addEventListener('click', () => {
+  electronAPI.setUDPOutPort(udpoutPortInput.value);
+});
+socketportInput.addEventListener('change', () => {
+  socketoutportInput.value = socketportInput.value;
 });
 
 const messages = document.getElementById('messages');
-electronAPI.onUDPOSCMsg((msg) => {
+electronAPI.onOSCMsg(({type, msg}) => {
   const item = document.createElement('li');
-  item.innerHTML = `<code>${JSON.stringify(msg, null, 2)}</code>`;
+  item.innerHTML = `
+  <div class="badge ${type}">${type}</div>
+  <code>
+    ${JSON.stringify(msg, null, 2)}
+  </code>`;
   messages.appendChild(item);
 });
