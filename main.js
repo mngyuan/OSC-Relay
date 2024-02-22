@@ -1,6 +1,8 @@
 const {app, BrowserWindow, ipcMain} = require('electron/main');
 const path = require('node:path');
 
+app.setName('OSC Relay');
+
 // -------------------------- OSC --------------------------
 const osc = require('osc');
 const express = require('express');
