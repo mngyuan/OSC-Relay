@@ -74,74 +74,8 @@
       }
     </style>
 
-    <div class="row">
-      <label for="udpinport">Receiving OSC UDP Port</label>
-      <div>
-        <input
-          type="number"
-          id="udpinport"
-          name="udpinport"
-          required
-          size="10"
-          value="9999"
-        />
-        <button id="udpinportset">Set</button>
-      </div>
-    </div>
+    <div id="app"></div>
 
-    <div class="row">↓</div>
-
-    <div class="row">
-      <label for="socketport">OSC Websocket Port</label>
-      <div>
-        <input
-          type="number"
-          id="socketport"
-          name="socketport"
-          required
-          size="10"
-          value="8081"
-        />
-        <button id="socketportset">Set</button>
-      </div>
-    </div>
-
-    <br />
-
-    <div class="row">
-      <label for="socketoutport">OSC Websocket Port</label>
-      <div>
-        <input
-          type="number"
-          id="socketoutport"
-          name="socketoutport"
-          required
-          size="10"
-          value="8081"
-          disabled
-        />
-        <button id="socketoutportset" disabled>Set</button>
-      </div>
-    </div>
-
-    <div class="row">↓</div>
-
-    <div class="row">
-      <label for="udpoutport">Sending OSC UDP Port</label>
-      <div>
-        <input
-          type="number"
-          id="udpoutport"
-          name="udpoutport"
-          required
-          size="10"
-          value="9998"
-        />
-        <button id="udpoutportset">Set</button>
-      </div>
-    </div>
-
-    <ul id="messages"></ul>
   </body>
   <script src="./renderer.js"></script>
 </html>

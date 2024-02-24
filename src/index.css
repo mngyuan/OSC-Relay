@@ -1,0 +1,62 @@
+body {
+  margin: 0;
+  padding: 1rem;
+  max-width: 38rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+    Arial, sans-serif;
+}
+
+button {
+  background: #333;
+  border: none;
+  padding: 0 1rem;
+  margin: 0.25rem;
+  border-radius: 3px;
+  outline: none;
+  color: #fff;
+}
+
+#messages {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+#messages > li {
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+}
+#messages > li:nth-child(odd) {
+  background: #efefef;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+input {
+  width: 60px;
+}
+
+p {
+  margin: 0;
+}
+
+.socket {
+  background-color: yellow;
+}
+
+.badge {
+  text-transform: uppercase;
+  font-size: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  margin-right: 8px;
+}
+
+.udp {
+  background-color: orange;
+}
