@@ -8,7 +8,7 @@ const App = () => {
 
   useEffect(() => {
     electronAPI.onOSCMsg((msg) => {
-      setMessages([...messages, msg]);
+      setMessages((messages) => [...messages, msg]);
     });
   }, [electronAPI]);
 
@@ -104,11 +104,11 @@ const App = () => {
       </div>
 
       <ul id="messages">
-        {messages.map(({type, msg}) => (
-          <>
+        {messages.map(({type, msg}, i) => (
+          <li key={i}>
             <div className={`badge ${type}`}>{type}</div>
-            <code>{msg}</code>
-          </>
+            <code>{JSON.stringify(msg, null, 2)}</code>
+          </li>
         ))}
       </ul>
     </>

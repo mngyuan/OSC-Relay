@@ -58,7 +58,7 @@ const createWindow = () => {
   // Set up OSC message forwarding to the frontend
   udpPort.on('message', function (msg) {
     console.log('udp', msg);
-    win.webContents.send('osc-msg', {type: 'udp', msg});
+    mainWindow.webContents.send('osc-msg', {type: 'udp', msg});
   });
 
   // and frontend forwarding to UDP
@@ -74,7 +74,7 @@ const createWindow = () => {
 
     socketPort.on('message', function (msg) {
       console.log('socket', msg);
-      win.webContents.send('osc-msg', {type: 'socket', msg});
+      mainWindow.webContents.send('osc-msg', {type: 'socket', msg});
     });
   });
 };
