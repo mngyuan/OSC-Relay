@@ -14,7 +14,7 @@ const express = require('express');
 const WebSocket = require('ws');
 
 // Bind to a UDP socket
-const udpPort = new osc.UDPPort({
+let udpPort = new osc.UDPPort({
   localAddress: '0.0.0.0',
   localPort: 9999,
   remoteAddress: '0.0.0.0',
@@ -28,10 +28,8 @@ const portReadyCb = () => {
   console.log(' Host: localhost Port:', udpPort.options.remotePort);
 };
 
-udpPort.on('ready', portReadyCb);
-udpPort.open();
-
 let socketPort;
+let relay;
 
 // Create an Express-based Web Socket server to which OSC messages will be relayed.
 const expressapp = express();
@@ -42,10 +40,11 @@ const wss = new WebSocket.Server({
 
 // -------------------------- END OSC --------------------------
 
+let mainWindow;
 const createWindow = () => {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    width: 400,
+  mainWindow = new BrowserWindow({
+    width: 600,
     height: 800,
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
@@ -56,7 +55,7 @@ const createWindow = () => {
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
   // Set up OSC message forwarding to the frontend
-  udpPort.on('message', function (msg) {
+  udpPort.on('message', (msg) => {
     console.log('udp', msg);
     mainWindow.webContents.send('osc-msg', {type: 'udp', msg});
   });
@@ -67,26 +66,43 @@ const createWindow = () => {
     socketPort = new osc.WebSocketPort({
       socket: socket,
     });
-
-    const relay = new osc.Relay(udpPort, socketPort, {
-      raw: true,
-    });
+    console.log('socketport');
 
     socketPort.on('message', function (msg) {
       console.log('socket', msg);
       mainWindow.webContents.send('osc-msg', {type: 'socket', msg});
     });
+
+    relay = new osc.Relay(udpPort, socketPort, {
+      raw: true,
+    });
+
+    mainWindow.webContents.send('websocket-connection');
   });
+};
+
+const refreshConnection = (options) => {
+  udpPort.close();
+  // otherwise next listen won't work; this is due to how osc.js works
+  udpPort.socket = undefined;
+  udpPort.options = {...udpPort.options, ...options};
+  udpPort.open();
+  if (socketPort) {
+    console.log('remaking relay');
+    relay.close();
+    relay = new osc.Relay(udpPort, socketPort, {
+      raw: true,
+    });
+  }
 };
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
-  ipcMain.on('set-udp-port', (event, arg) => {
-    console.log('Changing UDP in port to', arg);
-    udpPort.options.localPort = arg;
-    udpPort.open();
+  ipcMain.on('set-udp-in-port', (event, arg) => {
+    console.log('Changing UDP in port to', arg.address, arg.port);
+    refreshConnection({localAddress: arg.address, localPort: arg.port});
   });
   ipcMain.on('set-socket-port', (event, arg) => {
     console.log('Changing websocket out port to', arg);
@@ -94,9 +110,28 @@ app.on('ready', () => {
     server.listen(arg);
   });
   ipcMain.on('set-udp-out-port', (event, arg) => {
-    console.log('Changing UDP out port to', arg);
-    udpPort.options.remotePort = arg;
-    udpPort.open();
+    console.log('Changing UDP out port to', arg.address, arg.port);
+    refreshConnection({remoteAddress: arg.address, remotePort: arg.port});
+  });
+  ipcMain.on('toggle-udp-receive', (event, arg) => {
+    if (arg) {
+      refreshConnection({localAddress: arg.address, localPort: arg.port});
+      console.log('Enabling UDP receive relay', arg.address, arg.port);
+    } else {
+      refreshConnection({localAddress: 'localhost', localPort: 65534});
+      console.log('Disabling UDP receive relay');
+    }
+  });
+  ipcMain.on('toggle-socket-send', (event, arg) => {
+    if (arg) {
+      udpPort.options.remoteAddress = arg.address;
+      udpPort.options.remotePort = arg.port;
+      console.log('Enabling UDP send relay', arg.address, arg.port);
+    } else {
+      udpPort.options.remoteAddress = undefined;
+      udpPort.options.remotePort = undefined;
+      console.log('Disabling UDP send relay');
+    }
   });
 
   createWindow();

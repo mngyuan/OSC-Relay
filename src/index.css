@@ -1,8 +1,13 @@
 body {
   margin: 0 auto;
-  padding: 1rem;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
     Arial, sans-serif;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 }
 
 button {
@@ -15,10 +20,37 @@ button {
   color: #fff;
 }
 
+input.address {
+  font-family: 'Courier New', Courier, monospace;
+  width: 160px;
+}
+
+input.port {
+  font-family: 'Courier New', Courier, monospace;
+  width: 60px;
+}
+
+input[type='checkbox'] {
+  margin: 0;
+}
+
+.receiving {
+  user-select: none;
+  background-color: orange;
+  padding: 1rem;
+}
+
+.sending {
+  user-select: none;
+  background-color: yellow;
+  padding: 1rem;
+}
+
 #messages {
   list-style-type: none;
   margin: 0;
   padding: 0;
+  overflow-y: scroll;
 }
 #messages > li {
   padding: 0.5rem 1rem;
@@ -34,10 +66,6 @@ button {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-}
-
-input {
-  width: 60px;
 }
 
 p {
@@ -58,4 +86,11 @@ p {
 
 .udp {
   background-color: orange;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 10px;
+  display: inline-block;
 }
