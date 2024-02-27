@@ -1,8 +1,10 @@
 # OSC Relay
 
-## Running OSC Relay
+Forwards messages from a UDP port to a websocket, and vice-versa. Useful for connecting p5.js and other browser applications to native applications or other computers.
 
-Until a build is made, to run OSC Relay fun the following in terminal:
+Download the latest [release](/releases).
+
+## Development
 
 ```
 npm run start
