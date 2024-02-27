@@ -2,7 +2,7 @@
 
 Forwards messages from a UDP port to a websocket, and vice-versa. Useful for connecting p5.js and other browser applications to native applications or other computers.
 
-Download the latest [release](/releases).
+Download the latest [release](https://github.com/mngyuan/OSC-Relay/releases).
 
 ## Development
 
