@@ -1,8 +1,8 @@
 {
-  "name": "OSC Relay",
+  "name": "osc-relay",
   "productName": "OSC Relay",
-  "version": "1.0.0",
-  "description": "My Electron application description",
+  "version": "1.1.0",
+  "description": "Forward OSC messages from a UDP port to a websocket, and vice-versa.",
   "main": ".webpack/main",
   "scripts": {
     "start": "electron-forge start",
@@ -33,7 +33,11 @@
     "node-loader": "^2.0.0",
     "style-loader": "^3.0.0"
   },
-  "keywords": [],
+  "keywords": [
+    "osc",
+    "p5.js",
+    "relay"
+  ],
   "author": {
     "name": "Kevin Lee",
     "email": "k.lee@arts.ac.uk"
