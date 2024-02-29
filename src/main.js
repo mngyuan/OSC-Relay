@@ -13,23 +13,64 @@ const osc = require('osc');
 const express = require('express');
 const WebSocket = require('ws');
 
+let localPort = 9999;
+let remotePort = 9998;
 // Bind to a UDP socket
 let udpPort = new osc.UDPPort({
   localAddress: '0.0.0.0',
-  localPort: 9999,
+  localPort,
   remoteAddress: '0.0.0.0',
-  remotePort: 9998,
+  remotePort,
 });
 
-const portReadyCb = () => {
-  console.log('Listening for OSC over UDP.');
-  console.log(' Host: localhost Port:', udpPort.options.localPort);
-  console.log('Broadcasting OSC over UDP.');
-  console.log(' Host: localhost Port:', udpPort.options.remotePort);
+const refreshConnection = async (options) => {
+  console.log(udpPort);
+  if (udpPort) {
+    // udpPort.close() just calls this.socket.close(), lets do this async
+    // to avoid callback hell
+    closeUDPPort = () =>
+      new Promise((resolve, reject) => {
+        if (udpPort.socket) {
+          udpPort.socket.close((err) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve();
+            }
+          });
+        } else {
+          resolve();
+        }
+      });
+    await closeUDPPort();
+  }
+  localPort = options?.localPort || localPort;
+  remotePort = options?.remotePort || remotePort;
+  console.log(localPort, remotePort);
+  udpPort = new osc.UDPPort({
+    localAddress: '0.0.0.0',
+    localPort,
+    remoteAddress: '0.0.0.0',
+    remotePort,
+  });
+
+  udpPort.on('message', (msg) => {
+    console.log('UDP', msg);
+    socketPort?.send(msg);
+    mainWindow.webContents.send('osc-msg', {type: 'udp', msg});
+  });
+
+  udpPort.on('ready', () => {
+    console.log('Listening for OSC over UDP.');
+    console.log(' Host: localhost Port:', udpPort.options.localPort);
+    console.log('Broadcasting OSC over UDP.');
+    console.log(' Host: localhost Port:', udpPort.options.remotePort);
+  });
+
+  udpPort.open();
 };
 
 let socketPort;
-let relay;
 
 // Create an Express-based Web Socket server to which OSC messages will be relayed.
 const expressapp = express();
@@ -54,46 +95,54 @@ const createWindow = () => {
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
-  // Set up OSC message forwarding to the frontend
-  udpPort.on('message', (msg) => {
-    console.log('udp', msg);
-    mainWindow.webContents.send('osc-msg', {type: 'udp', msg});
-  });
-
   // and frontend forwarding to UDP
-  wss.on('connection', function (socket) {
-    console.log('A Web Socket connection has been established!');
+  wss.on('connection', (socket) => {
+    console.log(
+      'A Web Socket connection has been established. Clients:',
+      wss.clients.size,
+    );
     socketPort = new osc.WebSocketPort({
       socket: socket,
     });
-    console.log('socketport');
 
-    socketPort.on('message', function (msg) {
-      console.log('socket', msg);
+    socketPort.on('message', (msg) => {
+      console.log('SOCKET', msg);
+      udpPort.send(msg);
       mainWindow.webContents.send('osc-msg', {type: 'socket', msg});
     });
 
-    relay = new osc.Relay(udpPort, socketPort, {
-      raw: true,
-    });
+    mainWindow.webContents.send('websocket-connection', wss.clients.size);
 
-    mainWindow.webContents.send('websocket-connection');
+    socket.isAlive = true;
+    socket.on('error', console.error);
+    socket.on('pong', () => (socket.isAlive = true));
+    socket.on('close', () => {
+      console.log(
+        'Websocket client closed connection. Clients: ',
+        wss.clients.size,
+      );
+      mainWindow.webContents.send('websocket-connection', wss.clients.size);
+    });
   });
-};
 
-const refreshConnection = (options) => {
-  udpPort.close();
-  // otherwise next listen won't work; this is due to how osc.js works
-  udpPort.socket = undefined;
-  udpPort.options = {...udpPort.options, ...options};
-  udpPort.open();
-  if (socketPort) {
-    console.log('remaking relay');
-    relay.close();
-    relay = new osc.Relay(udpPort, socketPort, {
-      raw: true,
+  const interval = setInterval(() => {
+    wss.clients.forEach((socket) => {
+      if (socket.isAlive === false) {
+        socket.terminate();
+        console.log(
+          'Lost connection to a websocket client. Clients:',
+          wss.clients.size,
+        );
+        mainWindow.webContents.send('websocket-connection', wss.clients.size);
+        return;
+      }
+      socket.isAlive = false;
+      socket.ping();
     });
-  }
+  }, 3000);
+  wss.on('close', () => clearInterval(interval));
+
+  refreshConnection();
 };
 
 // This method will be called when Electron has finished
@@ -102,7 +151,7 @@ const refreshConnection = (options) => {
 app.on('ready', () => {
   ipcMain.on('set-udp-in-port', (event, arg) => {
     console.log('Changing UDP in port to', arg.address, arg.port);
-    refreshConnection({localAddress: arg.address, localPort: arg.port});
+    refreshConnection({localPort: arg.port});
   });
   ipcMain.on('set-socket-port', (event, arg) => {
     console.log('Changing websocket out port to', arg);
@@ -111,27 +160,7 @@ app.on('ready', () => {
   });
   ipcMain.on('set-udp-out-port', (event, arg) => {
     console.log('Changing UDP out port to', arg.address, arg.port);
-    refreshConnection({remoteAddress: arg.address, remotePort: arg.port});
-  });
-  ipcMain.on('toggle-udp-receive', (event, arg) => {
-    if (arg) {
-      refreshConnection({localAddress: arg.address, localPort: arg.port});
-      console.log('Enabling UDP receive relay', arg.address, arg.port);
-    } else {
-      refreshConnection({localAddress: 'localhost', localPort: 65534});
-      console.log('Disabling UDP receive relay');
-    }
-  });
-  ipcMain.on('toggle-socket-send', (event, arg) => {
-    if (arg) {
-      udpPort.options.remoteAddress = arg.address;
-      udpPort.options.remotePort = arg.port;
-      console.log('Enabling UDP send relay', arg.address, arg.port);
-    } else {
-      udpPort.options.remoteAddress = undefined;
-      udpPort.options.remotePort = undefined;
-      console.log('Disabling UDP send relay');
-    }
+    refreshConnection({remotePort: arg.port});
   });
 
   createWindow();
@@ -153,6 +182,3 @@ app.on('activate', () => {
     createWindow();
   }
 });
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and import them here.

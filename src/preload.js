@@ -10,7 +10,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onOSCMsg: (callback) =>
     ipcRenderer.on('osc-msg', (event, data) => callback(data)),
   onWebsocketConnection: (callback) =>
-    ipcRenderer.on('websocket-connection', (event) => callback()),
+    ipcRenderer.on('websocket-connection', (event, data) => callback(data)),
   toggleUDPReceive: (receiving) =>
     ipcRenderer.send('toggle-udp-receive', receiving),
   toggleSocketSend: (sending) =>

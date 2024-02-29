@@ -10,16 +10,6 @@ body {
   height: 100vh;
 }
 
-button {
-  background: #333;
-  border: none;
-  padding: 0 1rem;
-  margin: 0.25rem;
-  border-radius: 3px;
-  outline: none;
-  color: #fff;
-}
-
 input.address {
   font-family: 'Courier New', Courier, monospace;
   width: 160px;
@@ -44,6 +34,11 @@ input[type='checkbox'] {
   user-select: none;
   background-color: yellow;
   padding: 1rem;
+}
+
+.buttons {
+  padding: 0 1rem;
+  background-color: #efefef;
 }
 
 #messages {
@@ -93,4 +88,5 @@ p {
   height: 10px;
   border-radius: 10px;
   display: inline-block;
+  margin-left: 8px;
 }
