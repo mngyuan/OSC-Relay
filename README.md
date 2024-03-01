@@ -1,6 +1,6 @@
 # OSC Relay
 
-![An application titled OSC Relay showing OSC messages forwarded from UDP to a websocket and vice-versa](<OSC Relay.png>)
+<img src="OSC Relay.png" alt="An application titled OSC Relay showing OSC messages forwarded from UDP to a websocket and vice-versa" width="300"/>
 
 Forwards messages from a UDP port to a websocket, and vice-versa. Useful for connecting p5.js and other browser applications to native applications or other computers.
 
