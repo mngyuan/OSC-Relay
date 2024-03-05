@@ -24,11 +24,10 @@ let udpPort = new osc.UDPPort({
 });
 
 const refreshConnection = async (options) => {
-  console.log(udpPort);
   if (udpPort) {
     // udpPort.close() just calls this.socket.close(), lets do this async
     // to avoid callback hell
-    closeUDPPort = () =>
+    const closeUDPPort = () =>
       new Promise((resolve, reject) => {
         if (udpPort.socket) {
           udpPort.socket.close((err) => {
@@ -46,7 +45,6 @@ const refreshConnection = async (options) => {
   }
   localPort = options?.localPort || localPort;
   remotePort = options?.remotePort || remotePort;
-  console.log(localPort, remotePort);
   udpPort = new osc.UDPPort({
     localAddress: '0.0.0.0',
     localPort,
