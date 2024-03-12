@@ -54,7 +54,10 @@ const refreshConnection = async (options) => {
 
   udpPort.on('message', (msg) => {
     console.log('UDP', msg);
-    socketPort?.send(msg);
+    if (socketPort && socketPort.socket?.readyState != 3) {
+      // WebSocket.CLOSED = 3
+      socketPort.send(msg);
+    }
     mainWindow.webContents.send('osc-msg', {type: 'udp', msg});
   });
 
