@@ -15,12 +15,14 @@ const WebSocket = require('ws');
 
 let localPort = 9999;
 let remotePort = 9998;
+let remoteAddress = '0.0.0.0';
 // Bind to a UDP socket
 let udpPort = new osc.UDPPort({
   localAddress: '0.0.0.0',
   localPort,
-  remoteAddress: '0.0.0.0',
+  remoteAddress,
   remotePort,
+  broadcast: true,
 });
 
 const refreshConnection = async (options) => {
@@ -45,11 +47,13 @@ const refreshConnection = async (options) => {
   }
   localPort = options?.localPort || localPort;
   remotePort = options?.remotePort || remotePort;
+  remoteAddress = options?.remoteAddress || remotePort;
   udpPort = new osc.UDPPort({
     localAddress: '0.0.0.0',
     localPort,
-    remoteAddress: '0.0.0.0',
+    remoteAddress,
     remotePort,
+    broadcast: true,
   });
 
   udpPort.on('message', (msg) => {
@@ -65,7 +69,12 @@ const refreshConnection = async (options) => {
     console.log('Listening for OSC over UDP.');
     console.log(' Host: localhost Port:', udpPort.options.localPort);
     console.log('Broadcasting OSC over UDP.');
-    console.log(' Host: localhost Port:', udpPort.options.remotePort);
+    console.log(
+      ' Host:',
+      udpPort.options.remoteAddress,
+      'Port:',
+      udpPort.options.remotePort,
+    );
   });
 
   udpPort.open();
@@ -108,7 +117,7 @@ const createWindow = () => {
 
     socketPort.on('message', (msg) => {
       console.log('SOCKET', msg);
-      udpPort.send(msg);
+      udpPort.send(msg, '192.168.0.255', 9998);
       mainWindow.webContents.send('osc-msg', {type: 'socket', msg});
     });
 
@@ -161,7 +170,7 @@ app.on('ready', () => {
   });
   ipcMain.on('set-udp-out-port', (event, arg) => {
     console.log('Changing UDP out port to', arg.address, arg.port);
-    refreshConnection({remotePort: arg.port});
+    refreshConnection({remoteAddress: arg.address, remotePort: arg.port});
   });
 
   createWindow();

@@ -105,6 +105,21 @@ const App = () => {
           <label htmlFor="udpoutport">Sending OSC UDP Port</label>
           <div>
             <input
+              id="udpoutaddress"
+              name="udpoutaddress"
+              className="address"
+              required
+              size="10"
+              value={UDPOutAddress}
+              onChange={(e) => setUDPOutAddress(e.target.value)}
+              onBlur={(e) =>
+                electronAPI.setUDPOutPort({
+                  address: e.target.value,
+                  port: UDPOutPort,
+                })
+              }
+            />
+            <input
               type="number"
               id="udpoutport"
               name="udpoutport"
