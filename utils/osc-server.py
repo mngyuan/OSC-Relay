@@ -16,7 +16,8 @@ dispatcher.map("/*", print_handler)
 dispatcher.set_default_handler(default_handler)
 
 ip = "127.0.0.1"
-port = 9998
+port = 9999
 
+print(ip, port)
 server = BlockingOSCUDPServer((ip, port), dispatcher)
 server.serve_forever()

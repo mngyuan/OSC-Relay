@@ -53,7 +53,6 @@ const refreshConnection = async (options) => {
     localPort,
     remoteAddress,
     remotePort,
-    broadcast: true,
   });
 
   udpPort.on('message', (msg) => {
@@ -117,7 +116,7 @@ const createWindow = () => {
 
     socketPort.on('message', (msg) => {
       console.log('SOCKET', msg);
-      udpPort.send(msg, '192.168.0.255', 9998);
+      udpPort.send(msg);
       mainWindow.webContents.send('osc-msg', {type: 'socket', msg});
     });
 
