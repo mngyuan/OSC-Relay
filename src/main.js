@@ -47,7 +47,7 @@ const refreshConnection = async (options) => {
   }
   localPort = options?.localPort || localPort;
   remotePort = options?.remotePort || remotePort;
-  remoteAddress = options?.remoteAddress || remotePort;
+  remoteAddress = options?.remoteAddress || remoteAddress;
   udpPort = new osc.UDPPort({
     localAddress: '0.0.0.0',
     localPort,
